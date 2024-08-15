@@ -84,4 +84,23 @@ mod pipa_tests {
         let result = sdf().unwrap_or_default();
         assert_eq!(12, result);
     }
+
+    fn try_add_one(x: i32) -> Result<i32, ()> {
+        Ok(x + 1)
+    }
+
+    fn try_double(x: i32) -> Result<i32, ()> {
+        Ok(x * 2)
+    }
+
+    fn try_sdf() -> Result<i32, ()> {
+        let result = pipa_try!(5 => try_add_one => try_double);
+        Ok(result)
+    }
+
+    #[test]
+    fn pipe3() {
+        let result = try_sdf().unwrap_or_default();
+        assert_eq!(12, result);
+    }
 }
