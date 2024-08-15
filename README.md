@@ -5,7 +5,8 @@ Pipe Operator Library for Rust.
 Features:
 - Pipe things into chain of functions.
 - Support different types.
-- ...
+- Support pipe for `Try`-able types(Option & Result)
+- Support pipe for async-await with `Try`-able types(Option & Result)
 
 Example:
 ```rust
@@ -28,3 +29,5 @@ fn pipe() {
     assert_eq!(135, ret);
 }
 ```
+
+More examples are in `tests/test.rs`.
