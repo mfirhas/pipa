@@ -58,6 +58,8 @@ mod pipa_tests {
 
     #[test]
     fn pipe() {
+        let ret = pipa!(123);
+        assert_eq!(123, ret);
         let ret = pipa!(123 => f => g => h);
         assert_eq!(135, ret);
     }
