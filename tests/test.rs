@@ -1,4 +1,6 @@
-use pipa::{pipa, pipa_try};
+use std::time::Duration;
+
+use pipa::{pipa, pipa_await_try, pipa_try};
 
 fn f(a: i32) -> u64 {
     (a + 1) as u64
@@ -13,6 +15,7 @@ fn h(s: String) -> u64 {
     ret.unwrap() + 10
 }
 
+#[test]
 fn pipe() {
     let ret = pipa!(123);
     println!("pipe: {}", ret);
@@ -37,6 +40,7 @@ fn sdf() -> Option<i32> {
     Some(result)
 }
 
+#[test]
 fn pipe2() {
     let result = sdf().unwrap_or_default();
     println!("pipe2: {}", result);
@@ -56,14 +60,38 @@ fn try_sdf() -> Result<i32, ()> {
     Ok(result)
 }
 
+#[test]
 fn pipe3() {
     let result = try_sdf().unwrap_or_default();
     println!("pipe3: {}", result);
     assert_eq!(12, result);
 }
 
-fn main() {
-    pipe();
-    pipe2();
-    pipe3();
+async fn await_try_add_one(x: i32) -> Result<i32, ()> {
+    dbg!("await_try_add_one awaiting...");
+    tokio::time::sleep(Duration::from_millis(100)).await;
+    dbg!("await_try_add_one finished awaiting");
+    Ok(x + 1)
+}
+
+async fn await_try_double(x: i32) -> Result<i32, ()> {
+    dbg!("await_try_double awaiting...");
+    tokio::time::sleep(Duration::from_millis(10)).await;
+    dbg!("await_try_double finished awaiting");
+    Ok(x * 2)
+}
+
+async fn await_try_sdf() -> Result<i32, ()> {
+    dbg!("await_try_sdf awaiting...");
+    tokio::time::sleep(Duration::from_millis(400)).await;
+    let result = pipa_await_try!(5 => await_try_add_one => await_try_double);
+    dbg!("await_try_sdf finished awaiting");
+    Ok(result)
+}
+
+#[tokio::test]
+async fn pipe4() {
+    let result = await_try_sdf().await.unwrap();
+    println!("pipe3: {}", result);
+    assert_eq!(12, result);
 }
