@@ -117,7 +117,7 @@ impl D {
     }
 }
 
-struct E;
+enum E {}
 
 impl E {
     fn anu(n: i32) -> String {
