@@ -63,3 +63,52 @@ async fn test_mixed() {
     println!("RESULT of PIPE => {:?}", ret);
     assert!(ret.is_ok());
 }
+
+#[test]
+fn test_method() {
+    struct Anu {
+        s: i32,
+        d: String,
+    }
+
+    impl Anu {
+        fn method(&self, n: i32) -> String {
+            format!("{}-{}-{}", self.s, self.d, n)
+        }
+    }
+
+    let anu = Anu {
+        s: 123,
+        d: String::from("this"),
+    };
+
+    fn asd(s: String) -> String {
+        s
+    }
+
+    let ret = p!(anu.method(124) => asd);
+    assert_eq!(ret, "123-this-124")
+}
+
+#[tokio::test]
+async fn test_await_try() {
+    let ret = run_done().await;
+    dbg!(&ret);
+    assert!(ret.is_ok());
+}
+
+async fn run_done() -> Result<(), &'static str> {
+    let ret = p!(123 => run.await? => done.await?);
+    Ok(ret)
+}
+
+async fn run(n: u32) -> Result<String, &'static str> {
+    Ok(n.to_string())
+}
+
+async fn done(s: String) -> Result<(), &'static str> {
+    if s == "123" {
+        return Ok(());
+    }
+    Err("failed done")
+}

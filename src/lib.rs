@@ -59,6 +59,11 @@ macro_rules! p {
         $func($e).await
     };
 
+    // piping async returning try-able value: p!(func.await?)
+    ($e:expr => $func:ident.await?) => {
+        $func($e).await?
+    };
+
     // piping method calls with following functions: p!(o.method() => func)
     ($e:expr => $func:ident() => $($rest:tt)*) => {
         p!($e.$func() => $($rest)*)
@@ -77,5 +82,10 @@ macro_rules! p {
     // piping async functions: p!(val => func.await)
     ($e:expr => $func:ident.await => $($rest:tt)*) => {
         p!($func($e).await => $($rest)*)
+    };
+
+    // piping async returning try-able value with other expressions: p!(val => func.await? => expr)
+    ($e:expr => $func:ident.await? => $($rest:tt)*) => {
+        p!($func($e).await? => $($rest)*)
     };
 }
