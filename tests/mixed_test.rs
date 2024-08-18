@@ -26,8 +26,16 @@ async fn send(s: String) -> Result<String, &'static str> {
     Ok(format!("{} SENT SUCCESSFULLY!", s))
 }
 
-fn read_status(s: Result<String, &'static str>) -> Result<u8, &'static str> {
+async fn send_2(s: Result<String, &'static str>) -> Result<String, &'static str> {
+    tokio::time::sleep(Duration::from_millis(200)).await;
     if s.is_ok() {
+        return Ok(format!("{} SENT_2 SUCCESSFULLY!", s.unwrap()));
+    }
+    Err("send_2 failed")
+}
+
+fn read_status(s: String) -> Result<u8, &'static str> {
+    if !s.is_empty() {
         return Ok(1);
     }
     Err("FAILED!!")
@@ -47,9 +55,10 @@ async fn run_all(n: i32) -> Result<(), &'static str> {
         => add_one
         => parse_to_string
         => send.await
+        => send_2.await?
         => read_status?
-        => finalize.await
-    )?;
+        => finalize.await?
+    );
     if ret {
         return Ok(());
     }
@@ -111,4 +120,90 @@ async fn done(s: String) -> Result<(), &'static str> {
         return Ok(());
     }
     Err("failed done")
+}
+
+// ALL
+struct Obj {
+    val: i32,
+}
+
+impl Obj {
+    fn method(&self, x: i32) -> i32 {
+        x + self.val
+    }
+
+    fn method_rop(&self, x: i32) -> Result<i32, &'static str> {
+        if x > 10 {
+            Ok(x + self.val)
+        } else {
+            Err("Value too small")
+        }
+    }
+
+    async fn method_async(&self, x: i32) -> i32 {
+        x * 2
+    }
+
+    async fn method_async_rop(&self, x: i32) -> Result<i32, &'static str> {
+        if x > 10 {
+            Ok(x * 2)
+        } else {
+            Err("Value too small")
+        }
+    }
+}
+
+fn func(x: i32) -> i32 {
+    x * 2
+}
+
+fn func_rop(x: i32) -> Result<i32, &'static str> {
+    if x > 10 {
+        Ok(x * 3)
+    } else {
+        Err("Value too small")
+    }
+}
+
+async fn func_2(x: i32) -> i32 {
+    x * 4
+}
+
+async fn func_2_rop(x: i32) -> Result<i32, &'static str> {
+    if x > 10 {
+        Ok(x * 5)
+    } else {
+        Err("Value too small")
+    }
+}
+
+async fn run_them_all(obj: Obj) -> Result<i32, &'static str> {
+    let clo = |v: i32| -> i32 { v * 5 };
+
+    let result = p!(5
+        => func
+        => clo
+        => func_rop?
+        => func_2.await
+        => func_2_rop.await?
+        => obj.method
+        => func
+        => obj.method_rop?
+        => func_rop?
+        => obj.method_async.await
+        => obj.method_async_rop.await?
+    );
+
+    Ok(result)
+}
+
+#[tokio::test]
+async fn test_all() {
+    let obj = Obj { val: 5 };
+
+    let ret = run_them_all(obj).await;
+    dbg!(&ret);
+
+    assert!(ret.is_ok());
+    assert_eq!(ret.unwrap(), 72180);
 }

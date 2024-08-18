@@ -31,61 +31,99 @@ macro_rules! pipa_await_try {
     }};
 }
 
-/// p!(...) mixes expressions of plain value, try-able value, await-able value, and await-try-able value
+/// p!(...) mixes expressions:
+/// - functions
+/// - methods
+/// - functions returning try-able value
+/// - methods returning try-able value
+/// - async functions
+/// - async functions returning try-able value
+/// - async methods
+/// - async methods returning try-able value
 #[macro_export]
 macro_rules! p {
-    // single expression: p!(3), p!(function())
+    // Single expression: p!(3), p!(function())
     ($e:expr) => {
         $e
     };
 
-    // piping multiple expression with method calls: p!(o.method())
-    ($e:expr => $func:ident()) => {
-        $e.$func()
-    };
-
-    // piping simple function or method: p!(func())
+    // Piping a simple function call: p!(val => func)
     ($e:expr => $func:ident) => {
         $func($e)
     };
 
-    // piping with function returning Try-able values(Result & Option) using `?`: p!(4 => process?)
+    // Piping a function returning Try-able values (Result & Option) using `?`: p!(val => func?)
     ($e:expr => $func:ident?) => {
         $func($e)?
     };
 
-    // piping async function with `.await`: p!(5 => send.await)
+    // Piping an async function using `.await`: p!(val => func.await)
     ($e:expr => $func:ident.await) => {
         $func($e).await
     };
 
-    // piping async returning try-able value: p!(func.await?)
+    // Piping an async function returning Try-able values using `.await?`: p!(val => func.await?)
     ($e:expr => $func:ident.await?) => {
         $func($e).await?
     };
 
-    // piping method calls with following functions: p!(o.method() => func)
-    ($e:expr => $func:ident() => $($rest:tt)*) => {
-        p!($e.$func() => $($rest)*)
+    // Piping a method call: p!(val => obj.method)
+    ($e:expr => $obj:ident.$method:ident) => {
+        $obj.$method($e)
     };
 
-    // piping function calls with following functions: p!(func(params) => func)
+    // Piping a method returning Try-able values using `?`: p!(val => obj.method?)
+    ($e:expr => $obj:ident.$method:ident?) => {
+        $obj.$method($e)?
+    };
+
+    // Piping a method call with `await`: p!(val => obj.method.await)
+    ($e:expr => $obj:ident.$method:ident.await) => {
+        $obj.$method($e).await
+    };
+
+    // Piping a method call with `await?`: p!(val => obj.method.await?)
+    ($e:expr => $obj:ident.$method:ident.await?) => {
+        $obj.$method($e).await?
+    };
+
+    // Piping multiple operations with a simple function call: p!(v => func1 => func2)
     ($e:expr => $func:ident => $($rest:tt)*) => {
         p!($func($e) => $($rest)*)
     };
 
-    // piping functions returning Try-able value: p!(val => func?)
+    // Piping multiple operations with a function returning Try-able values using `?`: p!(v => func1? => expr)
     ($e:expr => $func:ident? => $($rest:tt)*) => {
         p!($func($e)? => $($rest)*)
     };
 
-    // piping async functions: p!(val => func.await)
+    // Piping multiple operations with an async function using `.await`: p!(v => func1.await => expr)
     ($e:expr => $func:ident.await => $($rest:tt)*) => {
         p!($func($e).await => $($rest)*)
     };
 
-    // piping async returning try-able value with other expressions: p!(val => func.await? => expr)
+    // Piping multiple operations with an async function returning Try-able values using `.await?`: p!(v => func1.await? => func2.await?)
     ($e:expr => $func:ident.await? => $($rest:tt)*) => {
         p!($func($e).await? => $($rest)*)
+    };
+
+    // Piping multiple operations with a method call: p!(v => obj.method => obj.method2 => obj2.method)
+    ($e:expr => $obj:ident.$method:ident => $($rest:tt)*) => {
+        p!($obj.$method($e) => $($rest)*)
+    };
+
+    // Piping multiple operations with a method call returning Try-able values using `?`: p!(v => obj.method? => obj.method2? => obj2.method?)
+    ($e:expr => $obj:ident.$method:ident? => $($rest:tt)*) => {
+        p!($obj.$method($e)? => $($rest)*)
+    };
+
+    // Piping multiple operations with a method call returning Try-able values using `?`: p!(v => obj.method.await => obj.method2? => obj2.method.await)
+    ($e:expr => $obj:ident.$method:ident.await => $($rest:tt)*) => {
+        p!($obj.$method($e).await => $($rest)*)
+    };
+
+    // Piping multiple operations with a method call returning Try-able values using `?`: p!(v => obj.method.await? => obj.method2? => obj2.method.await?)
+    ($e:expr => $obj:ident.$method:ident.await? => $($rest:tt)*) => {
+        p!($obj.$method($e).await? => $($rest)*)
     };
 }
