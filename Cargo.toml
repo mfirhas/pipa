@@ -1,11 +1,11 @@
 [package]
 name = "pipa"
-version = "0.3.0"
+version = "0.3.1"
 edition = "2021"
 authors = ["Muhammad Fathir Irhas <mfathirirhas@gmail.com>"]
 description = "Pipe Operator Library for Rust"
 categories = ["development-tools"]
-keywords = ["functional", "fp", "pipe", "pipe-operator"]
+keywords = ["pipe", "pipe-operator", "fp", "macro", "functional"]
 license = "MIT"
 repository = "https://github.com/mfirhas/pipa"
 

@@ -1,3 +1,4 @@
+/// pipa! only supports plain expressions(non-try-able and not async).
 #[macro_export]
 macro_rules! pipa {
     ($init:expr $(=> $fn:expr)*) => {{
@@ -9,6 +10,7 @@ macro_rules! pipa {
     }};
 }
 
+/// pipa_try! only supports expressions returning try-able value.
 #[macro_export]
 macro_rules! pipa_try {
     ($init:expr $(=> $fn:expr)*) => {{
@@ -20,6 +22,7 @@ macro_rules! pipa_try {
     }};
 }
 
+/// pipa_await_try only supports async expressions returning try-able value.
 #[macro_export]
 macro_rules! pipa_await_try {
     ($init:expr $(=> $fn:expr)*) => {{
@@ -31,7 +34,7 @@ macro_rules! pipa_await_try {
     }};
 }
 
-/// p!(...) mixes expressions:
+/// p! supports all mixes of expressions below:
 /// - functions
 /// - methods
 /// - functions returning try-able value
