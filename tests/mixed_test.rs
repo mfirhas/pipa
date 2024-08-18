@@ -203,6 +203,32 @@ impl D {
     }
 }
 
+struct E;
+
+impl E {
+    fn anu(n: i32) -> String {
+        format!("-> {}", n)
+    }
+
+    fn anu_try(s: String) -> Result<i32, &'static str> {
+        if !s.is_empty() {
+            return Ok(3000);
+        }
+        Err("failed anu try")
+    }
+
+    async fn async_anu(s: i32) -> u32 {
+        s as u32
+    }
+
+    async fn async_anu_try(s: u32) -> Result<u32, &'static str> {
+        if s > 0 {
+            return Ok(s);
+        }
+        Err("cannot accept 0")
+    }
+}
+
 async fn run_them_all(obj: Obj) -> Result<i32, &'static str> {
     let clo = |v: i32| -> i32 { v * 5 };
 
@@ -227,6 +253,14 @@ async fn run_them_all(obj: Obj) -> Result<i32, &'static str> {
         => D::async_anu_try.await?
     );
     assert_eq!(ret, 9000);
+
+    let ret = p!(5
+        => E::anu
+        => E::anu_try?
+        => E::async_anu.await
+        => E::async_anu_try.await?
+    );
+    assert_eq!(ret, 3000);
 
     Ok(result)
 }

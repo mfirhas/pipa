@@ -1,4 +1,32 @@
+#![allow(rustdoc::invalid_rust_codeblocks)]
+
+//! `pipa` is a declarative macro for pipe operator in Rust to support chaining multiple expressions.
+//!
+//! - `pipa!`: Supports only plain expressions(non-try-able and not async). When you want to make sure only plain values chained.
+//! - `pipa_try!`: Supports only expressions returning try-able values like `Option` and `Result`. When you want to implement ROP pattern.
+//! - `pipa_await_try!`: Supports only async expressions return try-able values. When you want to ROP on async functions only.
+//! - `p!`: Supports mixes expressions:
+//!     - functions
+//!     - associated functions
+//!     - methods
+//!     - async functions
+//!     - async associated functions
+//!     - async methods
+//!     - functions returning try-able value
+//!     - associated functions returning try-able value
+//!     - methods returning try-able value
+//!     - async functions returning try-able value
+//!     - async methods returning try-able value
+//!     - async associated functions returning try-able value
+
 /// pipa! only supports plain expressions(non-try-able and not async).
+///
+/// Example:
+/// ```rust,ignore
+/// use pipa::pipa;
+///
+/// pipa!(5 => double_it => add_one); // return 11
+/// ```
 #[macro_export]
 macro_rules! pipa {
     ($init:expr $(=> $fn:expr)*) => {{
@@ -11,6 +39,13 @@ macro_rules! pipa {
 }
 
 /// pipa_try! only supports expressions returning try-able value.
+///
+/// Example:
+/// ```rust,ignore
+/// use pipa::pipa_try;
+///
+/// pipa!(5 => double_it? => add_one?); // return 11, if none `None` nor `Err` found in the chains
+/// ```
 #[macro_export]
 macro_rules! pipa_try {
     ($init:expr $(=> $fn:expr)*) => {{
@@ -22,7 +57,14 @@ macro_rules! pipa_try {
     }};
 }
 
-/// pipa_await_try only supports async expressions returning try-able value.
+/// pipa_await_try only! supports async expressions returning try-able value.
+///
+/// Example:
+/// ```rust,ignore
+/// use pipa::pipa_try;
+///
+/// pipa!(5 => double_it.await? => add_one.await?); // return 11 concurrently, if none `None` nor `Err` found in the chains
+/// ```
 #[macro_export]
 macro_rules! pipa_await_try {
     ($init:expr $(=> $fn:expr)*) => {{
@@ -34,15 +76,48 @@ macro_rules! pipa_await_try {
     }};
 }
 
-/// p! supports all mixes of expressions below:
-/// - functions
-/// - methods
-/// - functions returning try-able value
-/// - methods returning try-able value
-/// - async functions
-/// - async functions returning try-able value
-/// - async methods
-/// - async methods returning try-able value
+/// p! supports all mixes of expressions
+///
+/// Example:
+/// ```rust,ignore
+/// use pipa::p;
+///
+/// async fn run_them_all(obj: Obj) -> Result<i32, &'static str> {
+///     let clo = |v: i32| -> i32 { v * 5 };
+///
+///     let result = p!(5
+///         => func
+///         => clo
+///         => func_rop?
+///         => func_2.await
+///         => func_2_rop.await?
+///         => obj.method
+///         => func
+///         => obj.method_rop?
+///         => func_rop?
+///         => obj.method_async.await
+///         => obj.method_async_rop.await?
+///     );
+///
+///     let ret = p!(5
+///         => D::anu
+///         => D::anu_try?
+///         => D::async_anu.await
+///         => D::async_anu_try.await?
+///     );
+///     assert_eq!(ret, 9000);
+///
+///     let ret = p!(5
+///         => E::anu
+///         => E::anu_try?
+///         => E::async_anu.await
+///         => E::async_anu_try.await?
+///     );
+///     assert_eq!(ret, 3000);
+///
+///     Ok(result)
+/// }
+/// ```
 #[macro_export]
 macro_rules! p {
     // Single expression: p!(3), p!(function())
