@@ -160,7 +160,7 @@ checksum = "bda66fc9667c18cb2758a2ac84d1167245054bcf85d5d1aaa6923f45801bdd02"
 
 [[package]]
 name = "pipa"
-version = "0.3.3"
+version = "0.4.0"
 dependencies = [
  "tokio",
 ]
