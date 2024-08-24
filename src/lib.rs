@@ -256,4 +256,67 @@ macro_rules! p {
         p!($type::$func($e).await? => $($rest)*)
     };
     //-- associated functions (END)
+
+    //-- inline closures
+    // Piping with an inline closure: p!(val => |arg| expr)
+    ($e:expr => |$arg:ident| $body:expr) => {
+        (|$arg| $body)($e)
+    };
+
+    // Piping with an inline closure with parameter type: p!(val => |arg: ty| expr)
+    ($e:expr => |$arg:ident : $type:ty| $body:expr) => {
+        (|$arg: $type| $body)($e)
+    };
+
+    // Piping with an inline closure with return type: p!(val => |arg| -> ty { expr })
+    ($e:expr => |$arg:ident| -> $ret:ty { $($body:tt)* }) => {
+        (|$arg| -> $ret { $($body)* })($e)
+    };
+
+    // Piping with an inline closure with parameter type and return type: p!(val => |arg: ty| -> ret { expr })
+    ($e:expr => |$arg:ident : $type:ty| -> $ret:ty { $($body:tt)* }) => {
+        (|$arg: $type| -> $ret { $($body)* })($e)
+    };
+
+    // Piping with an inline closure using braces: p!(val => |arg| { /* closure body */ })
+    ($e:expr => |$arg:ident| { $($body:tt)* }) => {
+        (|$arg| { $($body)* })($e)
+    };
+
+    // Piping with an inline closure with parameter type using braces: p!(val => |arg: ty| { /* closure body */ })
+    ($e:expr => |$arg:ident : $type:ty| { $($body:tt)* }) => {
+        (|$arg: $type| { $($body)* })($e)
+    };
+
+    // Piping multiple inline closures: p!(val => |arg| expr => next_op)
+    ($e:expr => |$arg:ident| $body:expr => $($rest:tt)*) => {
+        p!((|$arg| $body)($e) => $($rest)*)
+    };
+
+    // Piping multiple inline closures operations with a closure with parameter type: p!(val => |arg: ty| expr => next_op)
+    ($e:expr => |$arg:ident : $type:ty| $body:expr => $($rest:tt)*) => {
+        p!((|$arg: $type| $body)($e) => $($rest)*)
+    };
+
+    // piping multiple inline closures with unused args: p!(val => |arg| -> ret { expr })
+    ($e:expr => |$arg:ident| -> $ret:ty { $($body:tt)* } => $($rest:tt)*) => {
+        p!((|$arg| -> $ret { $($body)* })($e) => $($rest)*)
+    };
+
+
+    // Piping multiple inline closures operations with a closure with parameter type and return type: p!(val => |arg: ty| -> ret { expr } => next_op)
+    ($e:expr => |$arg:ident : $type:ty| -> $ret:ty { $($body:tt)* } => $($rest:tt)*) => {
+        p!((|$arg: $type| -> $ret { $($body)* })($e) => $($rest)*)
+    };
+
+    // Piping multiple inline closures operations with a closure using braces: p!(val => |$arg| { $($body:tt)* } => next_op)
+    ($e:expr => |$arg:ident| { $($body:tt)* } => $($rest:tt)*) => {
+        p!((|$arg| { $($body)* })($e) => $($rest)*)
+    };
+
+    // Piping multiple inline closures operations with a closure with parameter type using braces: p!(val => |$arg:ident : $type:ty| { $($body:tt)* } => next_op)
+    ($e:expr => |$arg:ident : $type:ty| { $($body:tt)* } => $($rest:tt)*) => {
+        p!((|$arg: $type| { $($body)* })($e) => $($rest)*)
+    };
+    //-- inline closures (END)
 }

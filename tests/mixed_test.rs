@@ -262,6 +262,35 @@ async fn run_them_all(obj: Obj) -> Result<i32, &'static str> {
     );
     assert_eq!(ret, 3000);
 
+    // inline closure tests
+    let ret = p!(5 => |i32| 2 => |n: i32| n + 5);
+    assert_eq!(ret, 7);
+    dbg!(&ret);
+
+    let ret = p!(5 => |n: i32| n * 2 => |n: i32| n + 5);
+    assert_eq!(ret, 15);
+    dbg!(&ret);
+
+    let ret = p!(5 => |i32| {2} => |n: i32| n + 5);
+    assert_eq!(ret, 7);
+    dbg!(&ret);
+
+    let ret = p!(5 => |n: i32| {n * 2} => |n: i32| n + 5);
+    assert_eq!(ret, 15);
+    dbg!(&ret);
+
+    let ret = p!(5 => |i32| -> i32 {2} => |n: i32| n + 5);
+    assert_eq!(ret, 7);
+    dbg!(&ret);
+
+    let ret = p!(5 => |n: i32| -> i32 { n * 2 } => |n: i32| n + 5);
+    assert_eq!(ret, 15);
+    dbg!(&ret);
+
+    let ret = p!(2 => func_2.await => |n: i32| -> i32 { n * 4 } => func => |x: i32| x - 2 => |y: i32| -> f32 { (y / 4) as f32 } );
+    assert_eq!(ret, 15_f32);
+    dbg!(&ret);
+
     Ok(result)
 }
 
