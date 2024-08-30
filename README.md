@@ -16,9 +16,29 @@ Features:
 
 Example:
 ```rust
+// call functions f taking 123 as its only parameter, and return as g's only parameter and g returns as h's only parameter, and so on.
+// `fn f(n: i32) -> T`
+// `fn g(n: T) -> U`
+// `fn h(n: U) -> V`
+// ret == V
 let ret = pipa!(123 => f => g => h);
-let ret = pipa_try!(123 => f? => ? => h?);
-let ret = pipa_await_try!(123 => f.await => g.await => h.await);
+
+// same as above, except all functions chained appended with `?` as they return Result/Option.
+// the T of each Result<T, E> or Option<T> will be input argument for the next functions.
+// `fn f(n: i32) -> Result<T, E>`
+// `fn g(n: T) -> Result<U, E>`
+// `fn h(n: U) -> Result<V, E>`
+// ret == V
+// Try operator automatically applied in each calls chain.
+let ret = pipa_try!(123 => f => g => h);
+
+// same as both above, except functions are async, await-ed, and return Result/Option.
+// `async fn f(n: i32) -> Result<T, E>`
+// `async fn g(n: T) -> Result<U, E>`
+// `async fn h(n: U) -> Result<V, E>`
+// ret == V
+// Each functions get await-ed and try operator automatically applied in each calls chain.
+let ret = pipa_await_try!(123 => f => g => h);
 ```
 
 Example mixing multiple kinds of expressions:

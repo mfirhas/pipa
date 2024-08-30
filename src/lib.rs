@@ -44,7 +44,7 @@ macro_rules! pipa {
 /// ```rust,ignore
 /// use pipa::pipa_try;
 ///
-/// pipa!(5 => double_it? => add_one?); // return 11, if none `None` nor `Err` found in the chains
+/// pipa_try!(5 => double_it => add_one); // return 11, if none `None` nor `Err` found in the chains
 /// ```
 #[macro_export]
 macro_rules! pipa_try {
@@ -63,7 +63,7 @@ macro_rules! pipa_try {
 /// ```rust,ignore
 /// use pipa::pipa_try;
 ///
-/// pipa!(5 => double_it.await? => add_one.await?); // return 11 concurrently, if none `None` nor `Err` found in the chains
+/// pipa_await_try!(5 => double_it => add_one); // return 11 concurrently, if none `None` nor `Err` found in the chains
 /// ```
 #[macro_export]
 macro_rules! pipa_await_try {
